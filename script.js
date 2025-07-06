@@ -5,6 +5,12 @@ let ballVelocityY = -0.2; // gravité simple
 let onGround = false;
 let servePhase = true;
 let serveBounceCount = { player: 0, ai: 0 };
+let lastBounceSide = null;
+
+let lastMouseY = null;
+let mouseSpeedY = 0;
+
+
 // Score
 let score = 0;
 
@@ -63,7 +69,20 @@ function init() {
   aiPaddle.position.set(0, 1, -9.5);
   scene.add(aiPaddle);
 
-  document.addEventListener('mousemove', onMouseMove, false);
+  document.addEventListener("mousemove", (event) => {
+    const newY = event.clientY;
+
+    if (lastMouseY !== null) {
+      mouseSpeedY = lastMouseY - newY; // si souris monte vite, speedY > 0
+    }
+
+    lastMouseY = newY;
+
+    // On déplace la raquette selon X
+    const x = (event.clientX / window.innerWidth) * 12 - 6;
+    playerPaddle.position.x = x;
+  });
+
 }
 
 function onMouseMove(event) {
@@ -77,35 +96,45 @@ function animate() {
   // Ball movement
   ball.position.add(ballVelocity);
 
-    // Gravité simple
-    ballVelocityY -= 0.01; // simulate gravity
-    ball.position.y += ballVelocityY;
+  // Gravité simple
+  ballVelocityY -= 0.01; // simulate gravity
+  ball.position.y += ballVelocityY;
 
-    // Rebond sur la table
-    if (ball.position.y <= 1 && !onGround) {
+  // Rebond sur la table
+  if (ball.position.y <= 1 && !onGround) {
     ballVelocityY = 0.2;
     onGround = true;
 
-    // Enregistre les rebonds pendant le service
+    const currentSide = ball.position.z > 0 ? 'player' : 'ai';
+
     if (servePhase) {
-        if (ball.position.z > 0) {
-        serveBounceCount.player += 1;
-        } else {
-        serveBounceCount.ai += 1;
+        serveBounceCount[currentSide]++;
+    } else {
+        // Après le service, vérifier que la balle ne rebondit qu'une fois par côté
+        if (currentSide === lastBounceSide) {
+        alert('Faute ! Double rebond du même côté.');
+        resetGame();
+        return;
         }
     }
-    }
 
-    // Sortie de la balle du plateau
-    if (ball.position.y <= 0.2 && ball.position.z > 10 || ball.position.z < -10) {
+    lastBounceSide = currentSide;
+  }
+
+  if (servePhase && serveBounceCount.player >= 1 && serveBounceCount.ai >= 1) {
+    servePhase = false; // Fin du service
+  }
+
+  // Sortie de la balle du plateau
+  if (ball.position.y <= 0.2 && ball.position.z > 10 || ball.position.z < -10) {
     alert("Game Over! Score: " + score);
     resetGame();
-    }
+  }
 
-    // Ball touches the table again => reset "onGround" state
-    if (ball.position.y > 1.1) {
+  // Ball touches the table again => reset "onGround" state
+  if (ball.position.y > 1.1) {
     onGround = false;
-    }
+  }
 
   // Rebond sur les murs
   if (ball.position.x <= -6 || ball.position.x >= 6) {
@@ -122,6 +151,21 @@ function animate() {
   if (ball.position.z <= -9 && Math.abs(ball.position.x - aiPaddle.position.x) < 1.5) {
     ballVelocity.z = -ballVelocity.z;
   }
+
+  // Collision raquette joueur
+  if (
+    ball.position.z > 8.5 && // Proche du joueur
+    Math.abs(ball.position.x - playerPaddle.position.x) < 2 &&
+    Math.abs(ball.position.y - playerPaddle.position.y) < 1 &&
+    Math.abs(ballVelocity.z) > 0 // pour éviter qu'on frappe une balle arrêtée
+  ) {
+    ballVelocity.z = -0.2 - Math.min(Math.max(mouseSpeedY / 100, 0), 1); // contrôle la force
+    ballVelocity.x = (ball.position.x - playerPaddle.position.x) * 0.05;
+    ballVelocityY = 0.2;
+    onGround = false;
+  }
+
+
 
   // AI paddle suit la balle
   aiPaddle.position.x += (ball.position.x - aiPaddle.position.x) * 0.05;
@@ -149,4 +193,5 @@ function resetGame() {
   onGround = false;
   servePhase = true;
   serveBounceCount = { player: 0, ai: 0 };
+  lastBounceSide = null;
 }
