@@ -5,6 +5,7 @@ Voici un exemple de fichier `README.md` pour ton jeu de ping pong 3D en JavaScri
 # 🏓 Ping Pong 3D – Jeu Navigateur
 
 Bienvenue dans **Ping Pong 3D**, un jeu de tennis de table en 3D développé en JavaScript à jouer directement dans votre navigateur. Ce projet propose une simulation simplifiée mais fidèle aux règles du tennis de table, avec une raquette contrôlée à la souris et une intelligence artificielle en face.
+Accessible ici : [https://michaelg-create.github.io/ping-pong-3D/](https://michaelg-create.github.io/ping-pong-3D/)
 
 ---
 
