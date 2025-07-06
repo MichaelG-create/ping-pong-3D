@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ping-Pong 3D</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong 3D - Version 1</title>
+    
+    <!-- Lien vers le fichier CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1>Ping-Pong 3D</h1>
-  <p>Score : <span id="score">0</span></p>
-  <div id="game-container"></div>
 
-  <!-- Import Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-  <script src="script.js"></script>
+<body>
+    <!-- ========================================= -->
+    <!-- STRUCTURE PRINCIPALE DU JEU -->
+    <!-- ========================================= -->
+    
+    <div id="gameContainer">
+        <!-- Interface utilisateur - Score -->
+        <div id="ui">
+            <div>Score: Joueur <span id="playerScore">0</span> - <span id="aiScore">0</span> IA</div>
+        </div>
+        
+        <!-- Instructions pour le joueur -->
+        <div id="instructions">
+            <p>Déplacez la souris pour contrôler votre raquette</p>
+            <p>Appuyez sur ↑ pour frapper la balle</p>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- CHARGEMENT DES SCRIPTS -->
+    <!-- ========================================= -->
+    
+    <!-- Librairie Three.js pour la 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Script principal du jeu -->
+    <script src="game.js"></script>
 </body>
 </html>
