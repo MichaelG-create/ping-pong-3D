@@ -7,8 +7,15 @@ let servePhase = true;
 let serveBounceCount = { player: 0, ai: 0 };
 let lastBounceSide = null;
 
-let lastMouseY = null;
-let mouseSpeedY = 0;
+let mouseClicked = false;
+
+// Variables pour la vitesse de la souris (optionnel, si on veut ajouter une mécanique de vitesse)
+// let lastMouseY = null;
+// let mouseSpeedY = 0;
+
+
+let playerScore = 0;
+let aiScore = 0;
 
 
 // Score
@@ -69,26 +76,36 @@ function init() {
   aiPaddle.position.set(0, 1, -9.5);
   scene.add(aiPaddle);
 
+  // Mouse controls
   document.addEventListener("mousemove", (event) => {
     const newY = event.clientY;
 
-    if (lastMouseY !== null) {
-      mouseSpeedY = lastMouseY - newY; // si souris monte vite, speedY > 0
-    }
+    // if (lastMouseY !== null) {
+    //   mouseSpeedY = lastMouseY - newY; // si souris monte vite, speedY > 0
+    // }
 
-    lastMouseY = newY;
+    // lastMouseY = newY;
 
     // On déplace la raquette selon X
     const x = (event.clientX / window.innerWidth) * 12 - 6;
     playerPaddle.position.x = x;
   });
 
+  document.addEventListener('mousedown', () => {
+    mouseClicked = true;
+  });
+
+  document.addEventListener('mouseup', () => {
+      mouseClicked = false;
+  });
+
+
 }
 
-function onMouseMove(event) {
-  const x = (event.clientX / window.innerWidth) * 2 - 1;
-  playerPaddle.position.x = x * 6; // Limit paddle movement
-}
+// function onMouseMove(event) {
+//   const x = (event.clientX / window.innerWidth) * 2 - 1;
+//   playerPaddle.position.x = x * 6; // Limit paddle movement
+// }
 
 function animate() {
   requestAnimationFrame(animate);
@@ -142,16 +159,12 @@ function animate() {
   }
 
   // Rebond sur les raquettes
-  if (ball.position.z >= 9 && Math.abs(ball.position.x - playerPaddle.position.x) < 1.5) {
-    ballVelocity.z = -ballVelocity.z;
-    score++;
-    scoreDisplay.textContent = score;
-  }
-
-  if (ball.position.z <= -9 && Math.abs(ball.position.x - aiPaddle.position.x) < 1.5) {
-    ballVelocity.z = -ballVelocity.z;
-  }
-
+  // Rebond sur la raquette du joueur
+  // if (ball.position.z >= 9 && Math.abs(ball.position.x - playerPaddle.position.x) < 1.5) {
+  //   ballVelocity.z = -ballVelocity.z;
+  //   score++;
+  //   scoreDisplay.textContent = score;
+  // }
   // Collision raquette joueur
   if (
     ball.position.z > 8.5 && // Proche du joueur
@@ -159,11 +172,25 @@ function animate() {
     Math.abs(ball.position.y - playerPaddle.position.y) < 1 &&
     Math.abs(ballVelocity.z) > 0 // pour éviter qu'on frappe une balle arrêtée
   ) {
-    ballVelocity.z = -0.2 - Math.min(Math.max(mouseSpeedY / 100, 0), 1); // contrôle la force
-    ballVelocity.x = (ball.position.x - playerPaddle.position.x) * 0.05;
+     if (mouseClicked) {
+        // puissance suffisante -> envoi normal côté adverse
+        ballVelocity.z = -0.25;  // vitesse vers l'adversaire
+        ballVelocityY = 0.2;
+    } else {
+        // clic non activé -> balle renvoyée avec faible puissance ou pas du tout
+        ballVelocity.z = -0.1;  // petite vitesse ou rejoue faible
+        ballVelocityY = 0.1;
+    }
+    onGround = false;
+  }
+
+  // Rebond sur la raquette AI
+  if (ball.position.z <= -9 && Math.abs(ball.position.x - aiPaddle.position.x) < 1.5) {
+    ballVelocity.z = 0.25;  // vitesse standard, un seul rebond côté joueur
     ballVelocityY = 0.2;
     onGround = false;
   }
+
 
 
 
